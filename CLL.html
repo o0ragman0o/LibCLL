@@ -1,0 +1,57 @@
+<!doctype>
+<html>
+<head>
+<script type='text/javascript'>
+
+var cll = contracts['CLL'].contract
+function acc() {
+	return web3.eth.accounts[0];
+}
+
+function push() {
+	var key = document.getElementById('key').value;
+	var res = cll.push(key, {from:acc()});
+	document.getElementById('queryres').innerText = res;
+}
+
+function pull() {
+	var res = cll.pull({from:acc()});
+	document.getElementById('queryres').innerText = res;
+}
+
+function pop() {
+	var res = cll.pop({from:acc()});
+	document.getElementById('queryres').innerText = res;
+}
+
+function next() {
+	var key = document.getElementById('key').value;
+	var res = cll.step(key, true);
+	document.getElementById('queryres').innerText = res;
+}
+	
+function prev(){
+	var key = document.getElementById('key').value;
+	var res = cll.step(key, false);
+	document.getElementById('queryres').innerText = res;
+}
+	
+</script>
+</head>
+<body bgcolor='#E6E6FA'>
+	<h3>Sample Ratings</h3>
+<div>
+Store:
+	<input type='number' id='key'>
+	<button onclick='push()'>Push</button>
+</div>
+<div>
+Query:
+	<input value='Pull' type='button' id='qryPull' onclick='pull()' />
+	<input value='Pop' type='button' id='qryPop' onclick='pop()' />
+	<input value='Next' type='button' id='qryNext' onclick='next()' />
+	<input value='Prev' type='button' id='qryPrev' onclick='prev()' />
+	<div id='queryres'></div>
+</div>
+</body>
+</html>
