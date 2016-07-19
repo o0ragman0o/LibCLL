@@ -1,195 +1,214 @@
 
-library LibCLL {
+library LibCLLi {
 /* Constants */
 
     uint constant NULL = 0;
     uint constant HEAD = NULL; // Lists are circular with static head.
-    bool constant PREV = false;
-    bool constant NEXT = true;
+    bool constant PREV = false; // Toward first in
+    bool constant NEXT = true; // Away from first in
     
 /* Structs */
 
     // Generic double linked list node.
     struct DoubleLinkNode {
-        uint dataIndex;
+        uint dataIndex; // not used if data elements are unique unless manually updated.
         mapping (bool => uint) links;
     }
     
     // Generic circular linked list parameters. Head is static index 0.
     struct LinkedList {
-        uint size;  // Number of nodes
-        uint newNodeKey; // Next free mapping slot
+        uint64 size;  // Number of nodes
+        uint64 newNodeKey; // Next free mapping slot
+        bool uniqueData; // will save a sstore by using data as key if true
         uint auxData; // auxilary data state variable.
         mapping (uint => DoubleLinkNode) nodes;
     }
-    
-/* Modifiers */
-
-    // To test if mapping keys point to a valid linked list node.
-    modifier isValidKey(LinkedList list, uint _nodeKey) { 
-        if (list.nodes[_nodeKey].dataIndex == 0) return; 
-        _
-    }
-
-    // To test if supplied is >0. Does not test is data at index is valid 
-    modifier isValidDataIndex(uint _dataIdx) {
-        if (_dataIdx == 0) return; 
-        _
-    }
 
 /* Functions */
-
-    function getNode(LinkedList list, uint _nodeKey)
-    	public
-        constant
-        returns (uint dataIndex_, uint prev_, uint next_)
-    {
-        dataIndex_ = list.nodes[_nodeKey].dataIndex;
-        prev_ = list.nodes[_nodeKey].links[PREV];
-        next_ = list.nodes[_nodeKey].links[NEXT];
-    }
-
-    function keyExists(LinkedList list, uint _nodeKey)
-        public
-        constant
-        isValidKey(list, _nodeKey)
-        returns (bool)
-    { 
-        return true;
-    }
-
+	
     // Initialises circular linked list to a valid state
-    function initLinkedList(LinkedList list, bool _reset) 
-        internal
-        returns (bool)
+    function init(LinkedList storage self, bool _uniqueData, bool _reset) 
+        internal returns (bool)
     {
-        if (list.nodes[HEAD].dataIndex != NULL && !_reset)
-        	return false; // List already exisits.
-        list.newNodeKey = 1; // key 0 is already head
-        list.nodes[HEAD].links[NEXT] = HEAD; // set next link to head
-        list.nodes[HEAD].links[PREV] = HEAD; // set previous link to head
-        list.nodes[HEAD].dataIndex = 1;
+        if (self.newNodeKey != NULL && !_reset) return false;
+        self.newNodeKey = 1; // can be used for list existence testing
+        self.uniqueData = _uniqueData;
+		self.nodes[HEAD].links[NEXT] = NULL; // reseting existing
+		self.nodes[HEAD].links[PREV] = NULL; // reseting existing
+        self.size = 0;
         return true;
     }
 
-    function stitch(LinkedList list, uint a, uint b, bool _dir)
+    function stitch(LinkedList storage self, uint a, uint b, bool _dir)
     	internal
     {
-     	list.nodes[a].links[_dir] = b;
-    	list.nodes[b].links[!_dir] = a;
+     	self.nodes[a].links[_dir] = b;
+    	self.nodes[b].links[!_dir] = a;
     }
 	
-    // Creates a new unlinked node or updates existing node dataIndex
-    // `_nodeKey` is arbtrary or auto assigned if 0.
-    function update(LinkedList list, uint _nodeKey, uint _dataIndex)
-        internal
-        returns (uint)
+    function update(LinkedList storage self, uint _nodeKey, uint _dataIndex)
+        internal returns (uint)
     {
-        if (_nodeKey == 0) _nodeKey = list.newNodeKey++;
-        if (!keyExists(list, _nodeKey)) list.size++;
-        list.nodes[_nodeKey].dataIndex = _dataIndex;
+        self.nodes[_nodeKey].dataIndex = _dataIndex;
         return _nodeKey;
     }
-  
-    function newNode(LinkedList list, uint _nodeKey, uint _dataIndex)
+	
+	/// @dev If the list is a set the data index is used as the node key
+    function newNode(LinkedList storage self, uint _dataIndex)
+        internal returns (uint nodeKey_)
+    {
+        nodeKey_ = _dataIndex;
+        if (!self.uniqueData) {
+            nodeKey_ = self.newNodeKey++;
+            self.nodes[nodeKey_].dataIndex = _dataIndex;
+        }
+        self.size++;
+        return nodeKey_;
+    }
+
+    /// _dir == false  Inserts new node BEFORE _nodeKey
+    /// _dir == true   Inserts new node AFTER _nodeKey
+    function insert (LinkedList storage self, uint a, uint b, bool _dir)
+        internal returns (uint)
+    {
+        uint c = self.nodes[a].links[_dir];
+        stitch (self, a, b, _dir);
+        stitch (self, b, c, _dir);
+        return b;
+    }
+
+    function insertNewNode(
+        LinkedList storage self,
+        uint _nodeKey,
+        uint _dataIndex,
+        bool _dir
+    )
+        internal returns (uint)
+    {
+        uint newKey = newNode(self, _dataIndex);
+        return insert(self, _nodeKey, newKey, _dir);
+    }
+           
+    function remove(LinkedList storage self, uint _nodeKey)
+        internal returns (uint dataIndex_)
+    {
+        if (_nodeKey == NULL) return;
+        dataIndex_ = _nodeKey; 
+        if (!self.uniqueData) dataIndex_ = self.nodes[_nodeKey].dataIndex;
+        uint a = self.nodes[_nodeKey].links[PREV];
+        uint b = self.nodes[_nodeKey].links[NEXT];
+        stitch(self, a, b, NEXT);
+        self.size--;
+        // Explicit deletes for mapping elements
+        delete self.nodes[_nodeKey].links[PREV];
+        delete self.nodes[_nodeKey].links[NEXT];
+        delete self.nodes[_nodeKey].dataIndex;
+        return;
+    }
+
+    function getNode(LinkedList storage self, uint _nodeKey)
+        internal constant returns (uint[3])
+    {
+        return [
+            self.nodes[_nodeKey].dataIndex,
+            self.nodes[_nodeKey].links[PREV],
+            self.nodes[_nodeKey].links[NEXT]];
+    }
+
+    function step(LinkedList storage self, uint _nodeKey, bool _dir)
+        internal constant returns (uint)
+    {
+        return self.nodes[_nodeKey].links[_dir];
+    }
+
+	// FILO storage
+    function push(LinkedList storage self, uint _num)
         internal
         returns (uint)
     {
-            return update(list, _nodeKey, _dataIndex);
+        return insertNewNode(self, HEAD, _num, NEXT);
     }
 
-    // _dir == false  Inserts new node BEFORE _nodeKey
-    // _dir == true   Inserts new node AFTER _nodeKey
-    function insert (LinkedList list, uint a, uint b, bool _dir)
-        internal
-        isValidKey(list, a)
+    function pop(LinkedList storage self) internal returns (uint)
     {
-        uint c = list.nodes[a].links[_dir];
-        stitch (list, a, b, _dir);
-        stitch (list, b, c, _dir);
+        return remove(self, step(self, HEAD, NEXT));
     }
 
-    function insertNewNode(LinkedList list,
-    				uint _nodeKey,
-                    uint _newKey,
-                    uint _dataIndex,
-                    bool _dir)
-        internal
-        returns (uint b)
+	// FIFO storage
+    function pushTail(LinkedList storage self, uint _num)
+        internal 
+        returns (uint)
     {
-    	b = update(list, _newKey, _dataIndex);
-    	insert(list, _nodeKey, _newKey, _dir);
+        return insertNewNode(self, HEAD, _num, PREV);
     }
 
-	function swap(LinkedList list, uint a, uint b)
-		internal
-	{
-		uint c = list.nodes[a].links[PREV];
-		uint d = list.nodes[a].links[NEXT];
-		uint e = list.nodes[b].links[PREV];
-		uint f = list.nodes[b].links[NEXT];
-	
-		stitch (list, c, b, NEXT);
-		stitch (list, b, d, NEXT);
-		stitch (list, e, a, NEXT);
-		stitch (list, a, f, NEXT);
-	}
-           
-    function remove(LinkedList list, uint _nodeKey)
-        internal
-        isValidKey(list, _nodeKey)
-        returns (bool)
+    function popTail(LinkedList storage self) internal returns (uint)
     {
-        uint a = list.nodes[_nodeKey].links[PREV];
-        uint b = list.nodes[_nodeKey].links[NEXT];
-        stitch(list, a, b, NEXT);
-        list.size--;
-        // Explicit deletes for mapping elements
-        delete list.nodes[_nodeKey].links[PREV];
-        delete list.nodes[_nodeKey].links[NEXT];
-        delete list.nodes[_nodeKey].dataIndex;
-        delete list.nodes[_nodeKey];
-        return true;
+        return remove(self, step(self, HEAD, PREV));
     }
+
     
-    function step(LinkedList list, uint _nodeKey, bool _dir)
-        // get next or previous node key
-        isValidKey(list, _nodeKey)
-        constant returns (uint)
-    {
-        return list.nodes[_nodeKey].links[_dir];
-    }
 }
 
 
 contract CLL
 {
-	LibCLL.LinkedList list;
-	uint output;
+/* Constants */
+
+    uint constant HEAD = 0; // Lists are circular with static head.
+    bool constant PREV = false;
+    bool constant NEXT = true;
+    
+	using LibCLLi for LibCLLi.LinkedList;
+
+	LibCLLi.LinkedList public list;
+	uint public output;
+
 	function CLL()	
 	{
-        list.nodes[HEAD].links[NEXT] = HEAD; // set next link to head
-        list.nodes[HEAD].links[PREV] = HEAD; // set previous link to head
-        list.nodes[HEAD].dataIndex = 1;
+        list.init(true, false);
 	}
 	
-	function push(uint num) public
+	function getNode(uint _nodeKey) public constant
+		returns (uint[3])
 	{
-		insertNewNode(list, HEAD, num, num, PREV);
+		return list.getNode(_nodeKey);
 	}
-
-	function pull() public returns (uint)
+	
+	function step(uint _nodeKey, bool _dir) public constant
+		returns (uint)
 	{
-		output = step(list, HEAD, NEXT);
-		remove(list, output);
-		return output;
+		return list.step(_nodeKey, _dir);
 	}
+	
+    function insert(uint key, uint num, bool _dir) public returns(uint)
+    {
+        output = list.insertNewNode(key, num, _dir);
+    }
 
+    function remove(uint num) public returns (uint)
+    {
+        output = list.remove(num);
+    }   
+
+    function push(uint num) public returns (uint)
+    {
+        output = list.push(num);
+    }
+    
 	function pop() public returns (uint)
 	{
-		output = step(list, HEAD, PREV);
-		remove(list, output);
-		return output;
+		output = list.pop();
+	}
+
+	function pushTail(uint num) public returns (uint)
+    {
+        output = list.pushTail(num);
+    }
+    
+	function pull() public returns (uint)
+	{
+		output = list.popTail();
 	}
 
 }
