@@ -88,42 +88,94 @@ All functions in the library are internal.  Any public access to the linked list
 should be wrapped in a public frunction of the utilzing contract.
 
 ```
+    /// @dev Initializes circular linked list to a valid state
+    /// @param _uniqueData determins if the list stores dataIndecies as link
+    /// keys (false) or in DoubleLinkNode.dataIndex.
+    function init(LinkedList storage self, bool _uniqueData)
+    	internal returns (bool);
+
+    /// @dev Resets a linked list to an initialized state
+    function reset(LinkedList storage self)
+        internal returns (bool);
+
+    /// @dev Reciprocally links two nodes a and b in the before/after 
+    /// direction given in _dir
+    function stitch(LinkedList storage self, uint a, uint b, bool _dir)
+    	internal;
+	
+    /// @dev Updates the value of DoubleLinkNode.dataIndex
+    /// @param _nodeKey the node to be updated
+    /// @param _dataIndex the update value to be stored
+    function update(LinkedList storage self, uint _nodeKey, uint _dataIndex)
+        internal returns (uint);
+	
+    /// @dev Creates a new unlinked node.
+    /// @param _dataIndex value to be stored or used as node key.
+	/// @dev If self.uniqueData == true _dataIndex itself is used as the node
+    /// key
+    function newNode(LinkedList storage self, uint _dataIndex)
+        internal returns (uint nodeKey_);
+
+    /// @dev Inserts a node between to existing nodes
+    /// @param a an existing node key
+    /// @param b the node key to insert
+    /// @dev _dir == false  Inserts new node BEFORE _nodeKey
+    /// @dev _dir == true   Inserts new node AFTER _nodeKey
+    function insert (LinkedList storage self, uint a, uint b, bool _dir)
+        internal returns (uint);
+
+    /// @dev Creates and inserts a new node
+    /// @param _nodeKey An existing node key to be insterted beside
+    /// @param _dataIndex the index value to be stored or used for the node
+    /// key
+    /// @param _dir The direction of the links to be created
+    function insertNewNode(
+        LinkedList storage self,
+        uint _nodeKey,
+        uint _dataIndex,
+        bool _dir
+    ) internal returns (uint);
+
+    /// @dev Deletes a node and its data from the linked list
+    /// @param _nodeKey The node to be deleted
+    /// @return dataIndex_ The value previously stored     
+    function remove(LinkedList storage self, uint _nodeKey)
+        internal returns (uint dataIndex_);
+
     /// @return Returns the node link data as a 3 element array
-    function getNode(uint _nodeKey) public constant returns (uint[3]);
-    
-    // Returns the next or previous node key from a given node key
-    // _nodeKey node to step from
-    // _dir direction of step. false=previous, true=next
-    // returns node key of neighbour
-    function step(uint _nodeKey, bool _dir) public constant returns (uint);
-    
-    // Inserts a node between to existing nodes
-    // _key an existing node key
-    // _num the node key/dataIndex to insert
-    // _dir == false  Inserts new node BEFORE _nodeKey
-    // _dir == true   Inserts new node AFTER _nodeKey
-    function insert(uint _key, uint _num, bool _dir) public returns(uint);
+    function getNode(LinkedList storage self, uint _nodeKey)
+        internal constant returns (uint[3]);
 
-    // Deletes a node and its data from the linked list
-    // _num The node to be deleted
-    // returns output The value previously stored     
-    function remove(uint _num) public returns (uint);
+    /// @dev To test if a node exists
+    function indexExists(LinkedList storage self, uint _nodeKey)
+        internal constant returns (bool);
 
-    // Creates new node 'next' to the head
-    // _num index to be stored or used for key
-    function push(uint _num) public returns (uint);
-    
-    // Deletes the node 'next' to the head
-    // returns the deleted node dataIndex/key value
-    function pop() public returns (uint);
+    /// @dev Returns the next or previous node key from a given node key
+    /// @param _nodeKey node to step from
+    /// @param _dir direction of step. false=previous, true=next
+    /// @return node key of neighbour
+    function step(LinkedList storage self, uint _nodeKey, bool _dir)
+        internal constant returns (uint);
 
-    // Creates new node 'previous' to the head
-    // _num index to be stored or used for key
-    function pushTail(uint _num) public returns (uint);
-   
-    // Deletes the node 'previous' to the head
-    // returns the deleted node dataIndex/key value
-    function popTail() public returns (uint);
+    /// @dev Creates new node 'next' to the head
+    /// @param _dataIndex index to be stored or used for key
+    function push(LinkedList storage self, uint _dataIndex)
+        internal
+        returns (uint);
+
+    /// @dev Deletes the node 'next' to the head
+    /// @return The deleted node dataIndex/key value
+    function pop(LinkedList storage self) internal returns (uint);
+
+    /// @dev Creates new node 'previous' to the head
+    /// @param _dataIndex index to be stored or used for key
+    function pushTail(LinkedList storage self, uint _dataIndex)
+        internal 
+        returns (uint);
+
+    /// @dev Deletes the node 'previous' to the head
+    /// @return The deleted node dataIndex/key value
+    function popTail(LinkedList storage self) internal returns (uint);
 ```
 
 
