@@ -11,14 +11,11 @@ a circular linked list.
 This library provisions lookup, navigation and key/index storage
 functionality to be used in conjuction with an array or mapping.
 
-
 This library is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU lesser General Public License for more details.
-
-You should have received a copy of the GNU lesser General Public License
-along with the DAO.  If not, see <http://www.gnu.org/licenses/>.
+<http://www.gnu.org/licenses/>.
 */
 
 
@@ -43,6 +40,8 @@ library LibCLLi {
     }
     
     // Generic circular linked list parameters. Head is static index 0.
+    // For storage optomisation, there is an assumption the node count will
+    // never be greater than 2**64.
     struct LinkedList {
 
         // Current number of nodes in linked list
