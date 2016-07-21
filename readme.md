@@ -1,20 +1,38 @@
-Circular Double Linked List
----------------------------
+#Circular Double Linked List
 
-An example of a Circular Linked List in Solidity for the Ethereum 
-platform.
+A Solidity library for implimenting a data indexing regime using a circular
+linked list.
+
+This library encodes a bidirectional ring storage structure which can provide
+lookup, navigation and key/index storage functionality of data indecies which
+can be used independantly or in conjuction with a storage array or mapping.
 
 This implimentation seeks to provide the minimumal API functionality of 
-inserting, updateing, removing and stepping. List nodes and data elements can 
-be accessed using the accessor functions of public 'list' and 'data' state 
-variables.
+inserting, updateing, removing and stepping through indeices.  Additional
+functions such as push(), pop(), pushTail(), popTail() can be used to impliment
+a First In Last Out (FILO) stack or a First In First Out (FIFO) ring buffer
+while the step() function can be used to create an itterater over such as a list
+of mapping keys.
 
-The UI is expected to impliment more sophisticated functionality such 
-as navigation, seek, push, pop, pull, etc. UI implimentations can take forms 
-such as a Stack, FIFO, Single and Double Linked list and mapping itterator.
+##Contributors
+Darryl Morris
 
-Data is kept in an array while the link nodes store array indecies to the 
-ascociated data.
+##Usage
+```
+import 'https://github.com/o0ragman0o/libCLLi/blob/master/libCLLi.sol';
+
+contract Foo {
+	
+    using LibCLLi for LibCLLi.LinkedList;
+
+    // The circular linked list storage structure
+    LibCLLi.LinkedList public list;
+
+    mapping (uint => <some type>) mappingToBeIndexed;
+    // or
+    <some type>[] arrayToBeIndexed;
+}
+```
 
 The linked nodes are stored in a seperate mapping with UINT mapping 
 keys `next` and `prev` for the purpose of linking nodes, while UINT `dataIdx`
