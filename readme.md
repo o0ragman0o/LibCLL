@@ -4,11 +4,12 @@ A Solidity library for implimenting a data indexing regime using a circular
 linked list.
 
 This library encodes a bidirectional ring storage structure which can provide
-lookup, navigation and key/index storage functionality of data indecies which
-can be used independantly or in conjuction with a storage array or mapping.
+lookup, navigation and key/index storage functionality of data indecies or keys
+which can be used independantly or in conjuction with a storage array or
+mapping.
 
 This implimentation seeks to provide the minimumal API functionality of 
-inserting, updateing, removing and stepping through indeices.  Additional
+inserting, updateing, removing and stepping through indecies.  Additional
 functions such as push(), pop(), pushTail(), popTail() can be used to impliment
 a First In Last Out (FILO) stack or a First In First Out (FIFO) ring buffer
 while the step() function can be used to create an itterater over such as a list
@@ -19,7 +20,7 @@ Darryl Morris
 
 ##Usage
 ```
-import 'https://github.com/o0ragman0o/libCLLi/blob/master/libCLLi.sol';
+import 'https://github.com/o0ragman0o/libCLLi/blob/master/LibCLLi.sol';
 
 contract Foo {
 	
@@ -36,7 +37,7 @@ contract Foo {
 
 ##Storage Structures
 The two structs that  are used are the DoubleLinkNode and the LinkedList which
-contrains a mapping of DoubleLinkNode.  Mutations to State are most expensive
+contains a mapping of DoubleLinkNode.  Mutations to State are most expensive
 when inserting a new node and can write upto 7 slots; 4 for links, 1 for
 dataIndex, 1 for size and 1 for newNodeKey. When index data is known to be
 unique, it can itself be used as the node keys and so dataIndex and newNodeKey
@@ -85,7 +86,7 @@ index. This also implies that an array being indexed should not store data at
 
 ##Functions
 All functions in the library are internal.  Any public access to the linked list
-should be wrapped in a public frunction of the utilzing contract.
+should be wrapped in a public function of the utilizing contract.
 
 ```
     /// @dev Initializes circular linked list to a valid state
@@ -116,7 +117,7 @@ should be wrapped in a public frunction of the utilzing contract.
     function newNode(LinkedList storage self, uint _dataIndex)
         internal returns (uint nodeKey_);
 
-    /// @dev Inserts a node between to existing nodes
+    /// @dev Inserts a node between two existing nodes
     /// @param a an existing node key
     /// @param b the node key to insert
     /// @dev _dir == false  Inserts new node BEFORE _nodeKey

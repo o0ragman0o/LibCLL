@@ -1,6 +1,6 @@
 /*
-file:   libCLLi.sol
-ver:    0.01_alpha
+file:   LibCLLi.sol
+ver:    0.1.0-alpha
 updated:21-Jun-2016
 author: Darryl Morris
 email:  o0ragman0o AT gmail.com
@@ -9,7 +9,7 @@ A Solidity library for implimenting a data indexing regime using
 a circular linked list.
 
 This library provisions lookup, navigation and key/index storage
-functionality to be used in conjuction with an array or mapping.
+functionality which can be used in conjuction with an array or mapping.
 
 This library is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -32,7 +32,7 @@ library LibCLLi {
     // Generic double linked list node.
     struct DoubleLinkNode {
 
-        // The index of data to be addressed. If data indecies are unique this
+        // The index of data to be addressed (optional if indecies are unique)
         uint dataIndex;
 
         // Bool PREV/NEXT link mapping to neighbouring nodes
@@ -66,7 +66,7 @@ library LibCLLi {
 
 /* Functions Public */
 
-    // All libCLLi functions are internal. External access to library functions
+    // All LibCLLi functions are internal. External access to library functions
     // should be through a Contract wrapper.
 
 /* Functions Internal */
