@@ -1,7 +1,7 @@
 
 /*
 file:   CLLi.sol
-ver:    0.01_alpha
+ver:    0.1.0-alpha
 updated:21-Jun-2016
 author: Darryl Morris
 email:  o0ragman0o AT gmail.com
@@ -20,7 +20,7 @@ GNU lesser General Public License for more details.
 <http://www.gnu.org/licenses/>.
 */
 
-import 'libCLLi.sol';
+import 'LibCLLi.sol';
 
 contract CLLi
 {
