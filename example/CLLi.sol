@@ -7,9 +7,9 @@ author: Darryl Morris
 email:  o0ragman0o AT gmail.com
 
 An example Solidity contract implimenting a data indexing regime using
-the libCLLi library.
+the LibCLLi library.
 
-This contract presents public access function wrappers (API) of the libCLLi
+This contract presents public access function wrappers (API) of the LibCLLi
 internal functions.
 
 
@@ -20,7 +20,7 @@ GNU lesser General Public License for more details.
 <http://www.gnu.org/licenses/>.
 */
 
-import 'LibCLLi.sol';
+import 'https://github.com/o0ragman0o/libCLLi/LibCLLi.sol';
 
 contract CLLi
 {

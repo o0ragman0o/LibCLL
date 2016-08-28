@@ -1,26 +1,17 @@
 #Circular Double Linked List Index Library
 
-A Solidity library for implimenting a data indexing regime using a circular
-linked list.
+A Solidity library for implimenting a data indexing regime using a circular linked list.
 
-This library encodes a bidirectional ring storage structure which can provide
-lookup, navigation and key/index storage functionality of data indecies or keys
-which can be used independantly or in conjuction with a storage array or
-mapping.
+This library encodes a bidirectional ring storage structure which can provide lookup, navigation and key/index storage functionality of data indecies or keys which can be used independantly or in conjuction with a storage array or mapping.
 
-This implimentation seeks to provide the minimumal API functionality of 
-inserting, updateing, removing and stepping through indecies.  Additional
-functions such as push(), pop(), pushTail(), popTail() can be used to impliment
-a First In Last Out (FILO) stack or a First In First Out (FIFO) ring buffer
-while the step() function can be used to create an itterater over such as a list
-of mapping keys.
+This implimentation seeks to provide the minimumal API functionality of inserting, updating, removing and stepping through indecies/keys.  Additional functions such as push(), pop(), pushTail(), popTail() can be used to impliment a First In Last Out (FILO) stack or a First In First Out (FIFO) ring buffer while the step() function can be used to create an itterater over such as a list of mapping keys.
 
 ##Contributors
-Darryl Morris
+Darryl Morris (o0ragman0o)
 
 ##Usage
 ```
-import 'https://github.com/o0ragman0o/libCLLi/blob/master/LibCLLi.sol';
+import 'https://github.com/o0ragman0o/libCLLi/LibCLLi.sol';
 
 contract Foo {
 	
@@ -35,17 +26,11 @@ contract Foo {
 }
 ```
 
-##Storage Structures
-The two structs that  are used are the DoubleLinkNode and the LinkedList which
-contains a mapping of DoubleLinkNode.  Mutations to State are most expensive
-when inserting a new node and can write upto 7 slots; 4 for links, 1 for
-dataIndex, 1 for size and 1 for newNodeKey. When index data is known to be
-unique, it can itself be used as the node keys and so dataIndex and newNodeKey
-won't need to be written into.
+Note also that this library passes struct parameters by reference rather than copying through memory. This requires that all library functions be internal and so are included in the calling contract's bytecode at compile time rather than the contract calling to a pre-deployed instance upon the blockchain using `DELEGATECALL`.
 
-Of note is the avoindance of '0' values for node keys as 0 is the head
-index. This also implies that an array being indexed should not store data at
-[0].
+##Storage Structures
+Two structs are used. `DoubleLinkNode` defines a linked list node containing the bidirectional links as mapping keys into `LinkedList::nodes` as well as an index slot which can be used as a lookup into an associated mapping or array.
+`LinkedList` contains primarily a mapping of `DoubleLinkNode` and current size of the list.
 
 ```
      // Generic double linked list node.
@@ -84,100 +69,99 @@ index. This also implies that an array being indexed should not store data at
     }
 ```
 
+##Mutations to State
+State mutations are most efficient if the lookup indecis or keys are known to be unique.  In such a case the keys/indecies can be stored as the node links themselves. `DoubleLinkNode::dataIndex` can be ignored and setting `LinkedList::uniqueData` will prevent updates to `LinkedList::newNodeKey`. In such a case, a call to `insert` will write to 5 state slots, 4 links and update `size`.
+
+The State mutations are most expensive when the key/index data is not unique. In this case node keys and links are governed by `LinkedList::newNodeKey` and lookup indecies are stored in `DoubleLinkNode::dataIndex`. Inserting a new node will write to 7 slots, 4 for links, 1 for dataIndex, 1 for size and 1 for
+newNodeKey.
+
+Zero values are not to be used for keys or data indecies as `0` is key of the linked list's static head node.
+
+
 ##Functions
-All functions in the library are internal.  Any public access to the linked list
-should be wrapped in a public function of the utilizing contract.
+All functions in the library are internal.  Any public access to the linked list should be wrapped in a public function of the utilizing contract.
 
-```
-    /// @dev Initializes circular linked list to a valid state
-    /// @param _uniqueData determins if the list stores dataIndecies as link
-    /// keys (false) or in DoubleLinkNode.dataIndex.
-    function init(LinkedList storage self, bool _uniqueData)
-    	internal returns (bool);
+```function init(LinkedList storage self, bool _uniqueData)
+    	internal returns (bool);```
+Initializes circular linked list to a valid state..
+`bool _uniqueData` determins if the list stores data indecies as link (true) or
+in `DoubleLinkNode::dataIndex` (false).
 
-    /// @dev Resets a linked list to an initialized state
-    function reset(LinkedList storage self)
-        internal returns (bool);
+```function reset(LinkedList storage self)
+        internal returns (bool);```
+Resets a linked list to an initialized state.
 
-    /// @dev Reciprocally links two nodes a and b in the before/after 
-    /// direction given in _dir
-    function stitch(LinkedList storage self, uint a, uint b, bool _dir)
-    	internal;
+```function stitch(LinkedList storage self, uint a, uint b, bool _dir)
+    	internal;```
+Reciprocally links two nodes `a` and `b` in the before/after direction given in `_dir`.
+
 	
-    /// @dev Updates the value of DoubleLinkNode.dataIndex
-    /// @param _nodeKey the node to be updated
-    /// @param _dataIndex the update value to be stored
-    function update(LinkedList storage self, uint _nodeKey, uint _dataIndex)
-        internal returns (uint);
+```function update(LinkedList storage self, uint _nodeKey, uint _dataIndex)
+        internal returns (uint);```
+Updates the value of `DoubleLinkNode.dataIndex`.
+`_nodeKey` the node to be updated.
+`_dataIndex` the update value to be stored.
 	
-    /// @dev Creates a new unlinked node.
-    /// @param _dataIndex value to be stored or used as node key.
-	/// @dev If self.uniqueData == true _dataIndex itself is used as the node
-    /// key
-    function newNode(LinkedList storage self, uint _dataIndex)
-        internal returns (uint nodeKey_);
+```function newNode(LinkedList storage self, uint _dataIndex)
+        internal returns (uint nodeKey_);```
+Creates a new unlinked node.
+`_dataIndex` value to be stored or used as node key. If `self.uniqueData == true` `_dataIndex` itself is used as the node key.
 
-    /// @dev Inserts a node between two existing nodes
-    /// @param a an existing node key
-    /// @param b the node key to insert
-    /// @dev _dir == false  Inserts new node BEFORE _nodeKey
-    /// @dev _dir == true   Inserts new node AFTER _nodeKey
-    function insert (LinkedList storage self, uint a, uint b, bool _dir)
-        internal returns (uint);
+```function insert (LinkedList storage self, uint a, uint b, bool _dir)
+        internal returns (uint);```
+Inserts a node between two existing nodes.
+`a` an existing node key.
+`b` the node key to insert.
+`_dir == false`  Inserts `b` BEFORE `a`.
+`_dir == true`   Inserts `b` AFTER `a`.
 
-    /// @dev Creates and inserts a new node
-    /// @param _nodeKey An existing node key to be insterted beside
-    /// @param _dataIndex the index value to be stored or used for the node
-    /// key
-    /// @param _dir The direction of the links to be created
-    function insertNewNode(
+```function insertNewNode(
         LinkedList storage self,
         uint _nodeKey,
         uint _dataIndex,
         bool _dir
-    ) internal returns (uint);
+    ) internal returns (uint);```
+Creates and inserts a new node.
+`_nodeKey` An existing node key to be insterted beside.
+`_dataIndex` the index value to be stored or used for the node key.
+`_dir` The direction of the links to be created.
 
-    /// @dev Deletes a node and its data from the linked list
-    /// @param _nodeKey The node to be deleted
-    /// @return dataIndex_ The value previously stored     
-    function remove(LinkedList storage self, uint _nodeKey)
-        internal returns (uint dataIndex_);
+```function remove(LinkedList storage self, uint _nodeKey)
+        internal returns (uint dataIndex_);```
+Deletes a node and its data from the linked list.
+`_nodeKey` The node to be deleted.
+`dataIndex_` The value previously stored before removal.
 
-    /// @return Returns the node link data as a 3 element array
-    function getNode(LinkedList storage self, uint _nodeKey)
-        internal constant returns (uint[3]);
+```function getNode(LinkedList storage self, uint _nodeKey)
+        internal constant returns (uint[3]);```
+Returns the node link data as a 3 element array
 
-    /// @dev To test if a node exists
-    function indexExists(LinkedList storage self, uint _nodeKey)
+function indexExists(LinkedList storage self, uint _nodeKey)
         internal constant returns (bool);
+To test if a node exists
 
-    /// @dev Returns the next or previous node key from a given node key
-    /// @param _nodeKey node to step from
-    /// @param _dir direction of step. false=previous, true=next
-    /// @return node key of neighbour
-    function step(LinkedList storage self, uint _nodeKey, bool _dir)
-        internal constant returns (uint);
+```function step(LinkedList storage self, uint _nodeKey, bool _dir)
+        internal constant returns (uint);```
+Returns the next or previous node key from a given node key
+`_nodeKey` node to step from
+`_dir` direction of step. false=previous, true=next
 
-    /// @dev Creates new node 'next' to the head
-    /// @param _dataIndex index to be stored or used for key
-    function push(LinkedList storage self, uint _dataIndex)
-        internal
-        returns (uint);
+```function push(LinkedList storage self, uint _dataIndex)
+        internal returns (uint);
+Creates new node 'next' to the head
+`_dataIndex` index to be stored or used for key
 
-    /// @dev Deletes the node 'next' to the head
-    /// @return The deleted node dataIndex/key value
-    function pop(LinkedList storage self) internal returns (uint);
+```function pop(LinkedList storage self) internal returns (uint);```
+Deletes the node 'next' to the head and returns it's dataIndex/key value
 
-    /// @dev Creates new node 'previous' to the head
-    /// @param _dataIndex index to be stored or used for key
-    function pushTail(LinkedList storage self, uint _dataIndex)
-        internal 
-        returns (uint);
+```function pushTail(LinkedList storage self, uint _dataIndex)
+        internal returns (uint);```
+Creates new node 'previous' to the head
+`_dataIndex` index to be stored or used for key
 
-    /// @dev Deletes the node 'previous' to the head
-    /// @return The deleted node dataIndex/key value
-    function popTail(LinkedList storage self) internal returns (uint);
-```
+```function popTail(LinkedList storage self) internal returns (uint);```
+Deletes the node 'previous' to the head and returns its dataIndex/key value
 
 
-
+## License
+All contributions are made under the GPLv3 license. See LICENSE.

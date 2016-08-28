@@ -1,7 +1,7 @@
 /*
 file:   LibCLLi.sol
 ver:    0.1.0-alpha
-updated:21-Jun-2016
+updated:23-Aug-2016
 author: Darryl Morris
 email:  o0ragman0o AT gmail.com
 
@@ -66,8 +66,12 @@ library LibCLLi {
 
 /* Functions Public */
 
-    // All LibCLLi functions are internal. External access to library functions
-    // should be through a Contract wrapper.
+    // In order to pass LinkedList structs by reference and not copied, all
+    // LibCLLi functions are internal. This also means that library bytecode
+    // will be compiled into the calling contract's bytecode rather than the
+    // contract using DELEGATECALL to library code stored on the Blockchain.
+    // Public access to this library functions is required should be through the
+    // calling contracts own public functions.
 
 /* Functions Internal */
 	
@@ -87,7 +91,7 @@ library LibCLLi {
     function reset(LinkedList storage self)
         internal returns (bool)
     {
-        self.newNodeKey = 1; // can be used for list existence testing
+        self.newNodeKey = 1; // can also be used for list existence testing
         self.nodes[HEAD].links[NEXT] = NULL; // reseting existing
         self.nodes[HEAD].links[PREV] = NULL; // reseting existing
         self.size = 0;
