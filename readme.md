@@ -82,33 +82,39 @@ Zero values are not to be used for keys or data indecies as `0` is key of the li
 All functions in the library are internal.  Any public access to the linked list should be wrapped in a public function of the utilizing contract.
 
 ```function init(LinkedList storage self, bool _uniqueData)
-    	internal returns (bool);```
+    	internal returns (bool);
+```
 Initializes circular linked list to a valid state..
 `bool _uniqueData` determins if the list stores data indecies as link (true) or
 in `DoubleLinkNode::dataIndex` (false).
 
 ```function reset(LinkedList storage self)
-        internal returns (bool);```
+        internal returns (bool);
+```
 Resets a linked list to an initialized state.
 
 ```function stitch(LinkedList storage self, uint a, uint b, bool _dir)
-    	internal;```
+    	internal;
+```
 Reciprocally links two nodes `a` and `b` in the before/after direction given in `_dir`.
 
 	
 ```function update(LinkedList storage self, uint _nodeKey, uint _dataIndex)
-        internal returns (uint);```
+        internal returns (uint);
+```
 Updates the value of `DoubleLinkNode.dataIndex`.
 `_nodeKey` the node to be updated.
 `_dataIndex` the update value to be stored.
 	
 ```function newNode(LinkedList storage self, uint _dataIndex)
-        internal returns (uint nodeKey_);```
+        internal returns (uint nodeKey_);
+```
 Creates a new unlinked node.
 `_dataIndex` value to be stored or used as node key. If `self.uniqueData == true` `_dataIndex` itself is used as the node key.
 
 ```function insert (LinkedList storage self, uint a, uint b, bool _dir)
-        internal returns (uint);```
+        internal returns (uint);
+```
 Inserts a node between two existing nodes.
 `a` an existing node key.
 `b` the node key to insert.
@@ -120,46 +126,55 @@ Inserts a node between two existing nodes.
         uint _nodeKey,
         uint _dataIndex,
         bool _dir
-    ) internal returns (uint);```
+    ) internal returns (uint);
+```
 Creates and inserts a new node.
 `_nodeKey` An existing node key to be insterted beside.
 `_dataIndex` the index value to be stored or used for the node key.
 `_dir` The direction of the links to be created.
 
 ```function remove(LinkedList storage self, uint _nodeKey)
-        internal returns (uint dataIndex_);```
+        internal returns (uint dataIndex_);
+```
 Deletes a node and its data from the linked list.
 `_nodeKey` The node to be deleted.
 `dataIndex_` The value previously stored before removal.
 
 ```function getNode(LinkedList storage self, uint _nodeKey)
-        internal constant returns (uint[3]);```
+        internal constant returns (uint[3]);
+```
 Returns the node link data as a 3 element array
 
-function indexExists(LinkedList storage self, uint _nodeKey)
+```function indexExists(LinkedList storage self, uint _nodeKey)
         internal constant returns (bool);
+```
 To test if a node exists
 
 ```function step(LinkedList storage self, uint _nodeKey, bool _dir)
-        internal constant returns (uint);```
+        internal constant returns (uint);
+```
 Returns the next or previous node key from a given node key
 `_nodeKey` node to step from
 `_dir` direction of step. false=previous, true=next
 
 ```function push(LinkedList storage self, uint _dataIndex)
         internal returns (uint);
+```
 Creates new node 'next' to the head
 `_dataIndex` index to be stored or used for key
 
-```function pop(LinkedList storage self) internal returns (uint);```
+```function pop(LinkedList storage self) internal returns (uint);
+```
 Deletes the node 'next' to the head and returns it's dataIndex/key value
 
 ```function pushTail(LinkedList storage self, uint _dataIndex)
-        internal returns (uint);```
+        internal returns (uint);
+```
 Creates new node 'previous' to the head
 `_dataIndex` index to be stored or used for key
 
-```function popTail(LinkedList storage self) internal returns (uint);```
+```function popTail(LinkedList storage self) internal returns (uint);
+```
 Deletes the node 'previous' to the head and returns its dataIndex/key value
 
 
