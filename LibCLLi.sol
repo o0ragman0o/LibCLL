@@ -1,15 +1,18 @@
 /*
 file:   LibCLLi.sol
 ver:    0.1.0-alpha
-updated:23-Aug-2016
+updated:28-Aug-2016
 author: Darryl Morris
 email:  o0ragman0o AT gmail.com
 
-A Solidity library for implimenting a data indexing regime using
+A Solidity library for implementing a data indexing regime using
 a circular linked list.
 
 This library provisions lookup, navigation and key/index storage
-functionality which can be used in conjuction with an array or mapping.
+functionality which can be used in conjunction with an array or mapping.
+
+NOTICE: This library uses internal functions only and so cannot be compiled
+and deployed independently from its calling contract.
 
 This library is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -32,7 +35,7 @@ library LibCLLi {
     // Generic double linked list node.
     struct DoubleLinkNode {
 
-        // The index of data to be addressed (optional if indecies are unique)
+        // The index of data to be addressed (optional if indices are unique)
         uint dataIndex;
 
         // Bool PREV/NEXT link mapping to neighbouring nodes
@@ -40,23 +43,23 @@ library LibCLLi {
     }
     
     // Generic circular linked list parameters. Head is static index 0.
-    // For storage optomisation, there is an assumption the node count will
+    // For storage optimisation, there is an assumption the node count will
     // never be greater than 2**64.
     struct LinkedList {
 
         // Current number of nodes in linked list
         uint64 size;
 
-        // The next key to be used in the nodes mapping if dataIndecies aren't
+        // The next key to be used in the nodes mapping if data indices aren't
         // unique. Set to 1 upon initialization to indicate list existence.
         uint64 newNodeKey;
 
-        // If data indecies are known to be unique, they can be used directly as
+        // If data indices are known to be unique, they can be used directly as
         // node keys instead of being stored in DoubleLinkNode.dataIndex, saving
         // sstore costs.
         bool uniqueData;
 
-        // auxilary storage slot for arbitrary use.
+        // auxiliary storage slot for arbitrary use.
         uint auxData;
 
         // The DoubleLinkNode's storage mapping being the core data structure
@@ -69,14 +72,14 @@ library LibCLLi {
     // In order to pass LinkedList structs by reference and not copied, all
     // LibCLLi functions are internal. This also means that library bytecode
     // will be compiled into the calling contract's bytecode rather than the
-    // contract using DELEGATECALL to library code stored on the Blockchain.
+    // contract using DELEGATECALL to library code stored on the blockchain.
     // Public access to this library functions is required should be through the
     // calling contracts own public functions.
 
 /* Functions Internal */
-	
+
     /// @dev Initializes circular linked list to a valid state
-    /// @param _uniqueData determins if the list stores dataIndecies as link
+    /// @param _uniqueData determins if the list stores data indices as link
     /// keys (false) or in DoubleLinkNode.dataIndex.
     function init(LinkedList storage self, bool _uniqueData) 
         internal returns (bool)
@@ -92,22 +95,21 @@ library LibCLLi {
         internal returns (bool)
     {
         self.newNodeKey = 1; // can also be used for list existence testing
-        self.nodes[HEAD].links[NEXT] = NULL; // reseting existing
-        self.nodes[HEAD].links[PREV] = NULL; // reseting existing
+        self.nodes[HEAD].links[NEXT] = NULL; // resetting existing
+        self.nodes[HEAD].links[PREV] = NULL; // resetting existing
         self.size = 0;
         return true;
     }
 
-
     /// @dev Reciprocally links two nodes a and b in the before/after 
     /// direction given in _dir
     function stitch(LinkedList storage self, uint a, uint b, bool _dir)
-    	internal
+        internal
     {
-     	self.nodes[a].links[_dir] = b;
-    	self.nodes[b].links[!_dir] = a;
+        self.nodes[a].links[_dir] = b;
+        self.nodes[b].links[!_dir] = a;
     }
-	
+
     /// @dev Updates the value of DoubleLinkNode.dataIndex
     /// @param _nodeKey the node to be updated
     /// @param _dataIndex the update value to be stored
@@ -117,10 +119,10 @@ library LibCLLi {
         self.nodes[_nodeKey].dataIndex = _dataIndex;
         return _nodeKey;
     }
-	
+
     /// @dev Creates a new unlinked node.
     /// @param _dataIndex value to be stored or used as node key.
-	/// @dev If self.uniqueData == true _dataIndex itself is used as the node
+    /// @dev If self.uniqueData == true _dataIndex itself is used as the node
     /// key
     function newNode(LinkedList storage self, uint _dataIndex)
         internal returns (uint nodeKey_)
@@ -150,7 +152,7 @@ library LibCLLi {
     }
 
     /// @dev Creates and inserts a new node
-    /// @param _nodeKey An existing node key to be insterted beside
+    /// @param _nodeKey An existing node key to be inserted beside
     /// @param _dataIndex the index value to be stored or used for the node
     /// key
     /// @param _dir The direction of the links to be created
@@ -251,5 +253,3 @@ library LibCLLi {
     /// @dev Directional FIFO storage can be enacted by
     /// push() followed by popTail() or pushTail() followed by pop()    
 }
-
-

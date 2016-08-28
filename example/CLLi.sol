@@ -1,12 +1,11 @@
-
 /*
 file:   CLLi.sol
 ver:    0.1.0-alpha
-updated:21-Jun-2016
+updated:28-Aug-2016
 author: Darryl Morris
 email:  o0ragman0o AT gmail.com
 
-An example Solidity contract implimenting a data indexing regime using
+An example Solidity contract implementing a data indexing regime using
 the LibCLLi library.
 
 This contract presents public access function wrappers (API) of the LibCLLi
