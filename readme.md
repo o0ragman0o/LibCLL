@@ -107,8 +107,7 @@ function update(LinkedList storage self, uint _nodeKey, uint _dataIndex)
 Updates the value of `DoubleLinkNode.dataIndex`.
 `_nodeKey` the node to be updated.
 `_dataIndex` the update value to be stored.
-```
-function newNode(LinkedList storage self, uint _dataIndex)
+``` function newNode(LinkedList storage self, uint _dataIndex)
         internal returns (uint nodeKey_);
 ```
 Creates a new unlinked node.
@@ -124,7 +123,8 @@ Inserts a node between two existing nodes.
 `_dir == false`  Inserts `b` BEFORE `a`.
 `_dir == true`   Inserts `b` AFTER `a`.
 
-```function insertNewNode(
+```
+function insertNewNode(
         LinkedList storage self,
         uint _nodeKey,
         uint _dataIndex,
