@@ -11,7 +11,7 @@ Darryl Morris (o0ragman0o)
 
 ##Usage
 ```
-import 'https://github.com/o0ragman0o/libCLLi/LibCLLi.sol';
+import 'https://github.com/o0ragman0o/LibCLLi/LibCLLi.sol';
 
 contract Foo {
     using LibCLLi for LibCLLi.LinkedList;
@@ -107,13 +107,16 @@ function update(LinkedList storage self, uint _nodeKey, uint _dataIndex)
 Updates the value of `DoubleLinkNode.dataIndex`.
 `_nodeKey` the node to be updated.
 `_dataIndex` the update value to be stored.
-``` function newNode(LinkedList storage self, uint _dataIndex)
+
+```
+function newNode(LinkedList storage self, uint _dataIndex)
         internal returns (uint nodeKey_);
 ```
 Creates a new unlinked node.
 `_dataIndex` value to be stored or used as node key. If `self.uniqueData == true` `_dataIndex` itself is used as the node key.
 
 ```
+
 function insert (LinkedList storage self, uint a, uint b, bool _dir)
         internal returns (uint);
 ```
