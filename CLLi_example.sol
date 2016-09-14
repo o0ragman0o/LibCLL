@@ -1,7 +1,7 @@
 /*
 file:   CLLi.sol
-ver:    0.1.0-alpha
-updated:28-Aug-2016
+ver:    0.2.0-alpha
+updated:14-Sep-2016
 author: Darryl Morris
 email:  o0ragman0o AT gmail.com
 
@@ -19,6 +19,8 @@ GNU lesser General Public License for more details.
 <http://www.gnu.org/licenses/>.
 */
 
+pragma solidity ^0.4.0;
+
 import 'LibCLLi.sol';
 
 contract CLLi
@@ -29,22 +31,21 @@ contract CLLi
     bool constant PREV = false;
     bool constant NEXT = true;
     
-    using LibCLLi for LibCLLi.LinkedList;
+    using LibCLLi for LibCLLi.CLL;
 
     // The circular linked list storage structure
-    LibCLLi.LinkedList public list;
+    LibCLLi.CLL list;
 
     // The result of the last function call
     uint public output;
 
     function CLLi()  
     {
-        list.init(true);
     }
     
     /// @return Returns the node link data as a 3 element array
     function getNode(uint _nodeKey) public constant
-        returns (uint[3])
+        returns (uint[2])
     {
         return list.getNode(_nodeKey);
     }
@@ -58,6 +59,12 @@ contract CLLi
     {
         return list.step(_nodeKey, _dir);
     }
+
+    function seek(uint _nodeKey, bool _dir) public returns(uint)
+    {
+        output = list.seek(_nodeKey, _dir);
+        return output;
+    }
     
     /// @notice Inserts a node between to existing nodes
     /// @param _key an existing node key
@@ -65,10 +72,9 @@ contract CLLi
     /// @param _dir The direction links are to be created
     /// @dev _dir == false  Inserts new node BEFORE _nodeKey
     /// @dev _dir == true   Inserts new node AFTER _nodeKey
-    function insert(uint _key, uint _num, bool _dir) public returns(uint)
+    function insert(uint _key, uint _num, bool _dir) public
     {
-        output = list.insertNewNode(_key, _num, _dir);
-        return output;
+        list.insert(_key, _num, _dir);
     }
 
     /// @notice Deletes a node and its data from the linked list
@@ -82,33 +88,16 @@ contract CLLi
 
     /// @notice Creates new node 'next' to the head
     /// @param _num index to be stored or used for key
-    function push(uint _num) public returns (uint)
+    function push(uint _num, bool _dir) public
     {
-        output = list.push(_num);
-        return output;
+        list.push(_num, _dir);
     }
     
     /// @notice Deletes the node 'next' to the head
     /// @return The deleted node dataIndex/key value
-    function pop() public returns (uint)
+    function pop(bool _dir) public returns (uint)
     {
-        output = list.pop();
-        return output;
-    }
-
-    /// @notice Creates new node 'previous' to the head
-    /// @param _num index to be stored or used for key
-    function pushTail(uint _num) public returns (uint)
-    {
-        output = list.pushTail(_num);
-        return output;
-    }
-    
-    /// @notice Deletes the node 'previous' to the head
-    /// @return The deleted node dataIndex/key value
-    function popTail() public returns (uint)
-    {
-        output = list.popTail();
+        output = list.pop(_dir);
         return output;
     }
 }
