@@ -1,4 +1,5 @@
 #Circular Double Linked List Index Library
+ver. 0.3.0
 
 A Solidity library for implementing a data indexing regime using a circular linked list.
 
@@ -11,6 +12,8 @@ Darryl Morris (o0ragman0o)
 
 ##Usage
 ```
+pragma solidity ^0.4.0;
+
 import 'LibCLLi.sol';
 
 contract Foo {
@@ -25,7 +28,7 @@ contract Foo {
 }
 ```
 
-Note that this library passes struct parameters by reference rather than copying through memory. This requires that all library functions be internal and so are included in the calling contract's bytecode at compile time rather than the contract calling to a predeployed instance upon the blockchain using `DELEGATECALL`.
+Note that this library uses internal functions only which are compiled into the calling contracts bytecode. No deployment or linking is required. This was found to be more efficient as the library bytecode itself compiles to a smaller size than the byte code used to call it if it was external. Being internal also yeilds greater gas efficiency.
 
 ##Storage Structures
 
@@ -33,7 +36,7 @@ Note that this library passes struct parameters by reference rather than copying
 
 ```
     struct CLL{
-        mapping (uint => mapping (bool => uint)) l;
+        mapping (uint => mapping (bool => uint)) cll;
     }
 ```
 
