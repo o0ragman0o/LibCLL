@@ -1,5 +1,5 @@
 #Circular Double Linked List Index Library
-ver. 0.3.0
+ver. 0.3.1
 
 A Solidity library for implementing a data indexing regime using a circular linked list.
 
@@ -14,13 +14,13 @@ Darryl Morris (o0ragman0o)
 ```
 pragma solidity ^0.4.0;
 
-import 'LibCLLi.sol';
+import 'LibCLL.sol';
 
 contract Foo {
-    using LibCLLi for LibCLLi.CLL;
+    using LibCLLu for LibCLLu.CLL;
 
     // The circular linked list storage structure
-    LibCLLi.CLL public list;
+    LibCLLu.CLL public list;
 
     mapping (uint => <some_type>) mappingToBeIndexed;
     // or
