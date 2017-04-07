@@ -1,7 +1,7 @@
 /*
 file:   LibCLL.sol
-ver:    0.3.1
-updated:21-Sep-2016
+ver:    0.4.0
+updated:31-Mar-2016
 author: Darryl Morris
 email:  o0ragman0o AT gmail.com
 
@@ -14,21 +14,21 @@ functionality which can be used in conjunction with an array or mapping.
 NOTICE: This library uses internal functions only and so cannot be compiled
 and deployed independently from its calling contract.
 
-This library is distributed in the hope that it will be useful,
+This software is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU lesser General Public License for more details.
-<http://www.gnu.org/licenses/>.
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+See MIT Licence for further details.
+<https://opensource.org/licenses/MIT>.
 */
 
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.10;
 
 // LibCLL using `uint` keys
 library LibCLLu {
 
-    string constant VERSION = "LibCLLu 0.3.1";
+    string constant public VERSION = "LibCLLu 0.4.0";
     uint constant NULL = 0;
-    uint constant HEAD = NULL;
+    uint constant HEAD = 0;
     bool constant PREV = false;
     bool constant NEXT = true;
     
@@ -37,10 +37,6 @@ library LibCLLu {
     }
 
     // n: node id  d: direction  r: return node id
-
-    function version() internal constant returns (string) {
-        return VERSION;
-    }
 
     // Return existential state of a list.
     function exists(CLL storage self)
@@ -93,7 +89,7 @@ library LibCLLu {
         self.cll[a][d] = b;
     }
 
-    // Insert node `b` beside and existing node `a` in direction `d`.
+    // Insert node `b` beside existing node `a` in direction `d`.
     function insert (CLL storage self, uint a, uint b, bool d) internal  {
         uint c = self.cll[a][d];
         stitch (self, a, b, d);
@@ -120,9 +116,9 @@ library LibCLLu {
 // LibCLL using `int` keys
 library LibCLLi {
 
-    string constant VERSION = "LibCLLi 0.3.1";
+    string constant public VERSION = "LibCLLi 0.4.0";
     int constant NULL = 0;
-    int constant HEAD = NULL;
+    int constant HEAD = 0;
     bool constant PREV = false;
     bool constant NEXT = true;
     
@@ -131,10 +127,6 @@ library LibCLLi {
     }
 
     // n: node id  d: direction  r: return node id
-
-    function version() internal constant returns (string) {
-        return VERSION;
-    }
 
     // Return existential state of a node. n == HEAD returns list existence.
     function exists(CLL storage self, int n) internal constant returns (bool) {
@@ -206,5 +198,3 @@ library LibCLLi {
         return remove(self, step(self, HEAD, d));
     }
 }
-
-

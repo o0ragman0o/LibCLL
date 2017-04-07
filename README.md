@@ -1,5 +1,5 @@
-#Circular Double Linked List Index Library
-ver. 0.3.1
+# Circular Double Linked List Index Library
+ver. 0.4.0
 
 A Solidity library for implementing a data indexing regime using a circular linked list.
 
@@ -7,14 +7,14 @@ This library encodes a bidirectional ring storage structure which can provide lo
 
 This implementation seeks to provide the minimal API functionality of inserting, removing and stepping through a unique set of indices/keys. Functions such as push(), pop() can be used to implement a First In Last Out (FILO) stack or a First In First Out (FIFO) ring buffer while the step() function can be used to create an iterator over such as a list of mapping keys.
 
-##Contributors
+## Contributors
 Darryl Morris (o0ragman0o)
 
-##Usage
+## Usage
 ```
-pragma solidity ^0.4.0;
+pragma solidity ^0.4.10;
 
-import 'LibCLL.sol';
+import 'https://github.com/o0ragman0o/LibCLL/LibCLL.sol';
 
 contract Foo {
     using LibCLLu for LibCLLu.CLL;
@@ -30,7 +30,7 @@ contract Foo {
 
 Note that this library uses internal functions only which are compiled into the calling contracts bytecode. No deployment or linking is required. This was found to be more efficient as the library bytecode itself compiles to a smaller size than the byte code used to call it if it was external. Being internal also yeilds greater gas efficiency.
 
-##Storage Structures
+## Storage Structures
 
 `LinkedList` is a nested mapping with the first key being the node index (uint) and the second being the bidirectional link (bool) to a neighbouring node. Key `0` implies the head so writes to `LinkedList.l[0]` or manually linking to Linklist.l[0] (e.g. ll[var1][false] = 0;) are to be avoided by the calling contract. 
 
@@ -40,15 +40,15 @@ Note that this library uses internal functions only which are compiled into the 
     }
 ```
 
-##Mutations to State
+## Mutations to State
 The bidirectional links consist of two State slots (2x uint256) which are written to by the function `stitch()`.
 `insert()` calls `stitch()` twice for a total of 4 state mutations.
 `remove` calls `stitch()` once and deletes two slots.
 
-##Functions
+## Functions
 All functions in the library are internal. Any public access to the linked list should be wrapped in a public functions of the utilising contract.
 
-###exists
+### exists
 ```
 function exists(CLL storage self) internal constant returns (bool)
 ```
@@ -56,7 +56,7 @@ Returns the existential state of the list itself.
 `true` HEAD links to non-zero node.
 `false` HEAD links to zero.
 
-###stitch
+### stitch
 ```
 function stitch(CLL storage self, uint a, uint b, bool d)  internal
 ```
@@ -64,7 +64,7 @@ Reciprocally links two nodes `a` and `b` in the before/after direction given in 
 `d == false` Link `a` previous to `b`.
 `d == true` Link `a` next from `b`.
 
-###insert
+### insert
 ```
 function insert (CLL storage self, uint a, uint b, bool d) internal
 ```
@@ -74,20 +74,20 @@ Inserts a node between two existing nodes.
 `d == false`  Insert `b` BEFORE `a`. 
 `d == true`   Insert `b` AFTER `a`.
 
-###remove
+### remove
 ```
 function remove(CLL storage self, uint n)  internal returns (uint)
 ```
 Deletes a node from the linked list and returns its value.
 `n` The node to be deleted.
 
-###getNode
+### getNode
 ```
 function getNode(CLL storage self, uint n) internal constant returns (uint[2])
 ```
 Returns the bidirectional link as a uint[2] array in the form of `[PREV, NEXT]`
 
-###step
+### step
 ```
 function step(CLL storage self, uint n, bool d) internal constant returns (uint)
 ```
@@ -96,7 +96,7 @@ Returns the next or previous node key from a given node key.
 `d == false` Returns the previous node key.
 `d == true` Returns the next node key.
 
-###seek
+### seek
 ```
 function seek(CLL storage self, uint n, bool d) internal constant returns (uint)
 ```
@@ -106,7 +106,7 @@ This function can be used before insert() in order to build an orderd list.
 `d == false` Seek in decending order.
 `d == true` Seek in ascending order.
 
-###push
+### push
 ```
 function push(CLL storage self, uint n, bool d) internal
 ```
@@ -115,7 +115,7 @@ Creates a new node 'previous' or 'next' to the head.
 `d == false` Returns the previous node key.
 `d == true` Returns the next node key.
 
-###pop
+### pop
 ```
 function pop(CLL storage self, bool d) internal returns (uint)
 ```
@@ -123,7 +123,7 @@ Deletes the node 'previous' or 'next' to the head and returns its value.
 `d == false` Returns the previous node key.
 `d == true` Returns the next node key.
 
-##Use Cases
+## Use Cases
 
 TODO
 
