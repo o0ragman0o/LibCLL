@@ -1,7 +1,7 @@
 /*
 file:   LibCLL.sol
-ver:    0.4.0
-updated:31-Mar-2016
+ver:    0.4.1
+updated:18-Dec-2017
 author: Darryl Morris
 email:  o0ragman0o AT gmail.com
 
@@ -19,14 +19,21 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
 See MIT Licence for further details.
 <https://opensource.org/licenses/MIT>.
+
+Release Notes:
+* Changed to MIT licensing
+* minimum Solidity version 0.4.17
+* using `view` modifier in place of `constant`
+* VERSION type changed from `string` to `bytes32`
+
 */
 
-pragma solidity ^0.4.10;
+pragma solidity ^0.4.17;
 
 // LibCLL using `uint` keys
 library LibCLLu {
 
-    string constant public VERSION = "LibCLLu 0.4.0";
+    bytes32 constant public VERSION = "LibCLLu 0.4.1";
     uint constant NULL = 0;
     uint constant HEAD = 0;
     bool constant PREV = false;
@@ -40,15 +47,16 @@ library LibCLLu {
 
     // Return existential state of a list.
     function exists(CLL storage self)
-        internal
-        constant returns (bool)
+        internal view returns (bool)
     {
         if (self.cll[HEAD][PREV] != HEAD || self.cll[HEAD][NEXT] != HEAD)
             return true;
     }
     
     // Returns the number of elements in the list
-    function sizeOf(CLL storage self) internal constant returns (uint r) {
+    function sizeOf(CLL storage self)
+        internal view returns (uint r)
+    {
         uint i = step(self, HEAD, NEXT);
         while (i != HEAD) {
             i = step(self, i, NEXT);
@@ -59,14 +67,14 @@ library LibCLLu {
 
     // Returns the links of a node as and array
     function getNode(CLL storage self, uint n)
-        internal  constant returns (uint[2])
+        internal view returns (uint[2])
     {
         return [self.cll[n][PREV], self.cll[n][NEXT]];
     }
 
     // Returns the link of a node `n` in direction `d`.
     function step(CLL storage self, uint n, bool d)
-        internal  constant returns (uint)
+        internal view returns (uint)
     {
         return self.cll[n][d];
     }
@@ -76,7 +84,7 @@ library LibCLLu {
     // `b` value to seek
     // `r` first node beyond `b` in direction `d`
     function seek(CLL storage self, uint a, uint b, bool d)
-        internal  constant returns (uint r)
+        internal view returns (uint r)
     {
         r = step(self, a, d);
         while  ((b!=r) && ((b < r) != d)) r = self.cll[r][d];
@@ -84,18 +92,19 @@ library LibCLLu {
     }
 
     // Creates a bidirectional link between two nodes on direction `d`
-    function stitch(CLL storage self, uint a, uint b, bool d) internal  {
+    function stitch(CLL storage self, uint a, uint b, bool d) internal {
         self.cll[b][!d] = a;
         self.cll[a][d] = b;
     }
 
     // Insert node `b` beside existing node `a` in direction `d`.
-    function insert (CLL storage self, uint a, uint b, bool d) internal  {
+    function insert (CLL storage self, uint a, uint b, bool d) internal {
         uint c = self.cll[a][d];
         stitch (self, a, b, d);
         stitch (self, b, c, d);
     }
     
+    // Remove node
     function remove(CLL storage self, uint n) internal returns (uint) {
         if (n == NULL) return;
         stitch(self, self.cll[n][PREV], self.cll[n][NEXT], NEXT);
@@ -104,10 +113,12 @@ library LibCLLu {
         return n;
     }
 
-    function push(CLL storage self, uint n, bool d) internal  {
+    // Push a new node before or after the head
+    function push(CLL storage self, uint n, bool d) internal {
         insert(self, HEAD, n, d);
     }
     
+    // Pop a new node from before or after the head
     function pop(CLL storage self, bool d) internal returns (uint) {
         return remove(self, step(self, HEAD, d));
     }
@@ -116,7 +127,7 @@ library LibCLLu {
 // LibCLL using `int` keys
 library LibCLLi {
 
-    string constant public VERSION = "LibCLLi 0.4.0";
+    bytes32 constant public VERSION = "LibCLLi 0.4.1";
     int constant NULL = 0;
     int constant HEAD = 0;
     bool constant PREV = false;
@@ -129,12 +140,17 @@ library LibCLLi {
     // n: node id  d: direction  r: return node id
 
     // Return existential state of a node. n == HEAD returns list existence.
-    function exists(CLL storage self, int n) internal constant returns (bool) {
+    function exists(CLL storage self, int n)
+        internal view returns (bool)
+    {
         if (self.cll[HEAD][PREV] != HEAD || self.cll[HEAD][NEXT] != HEAD)
             return true;
     }
+
     // Returns the number of elements in the list
-    function sizeOf(CLL storage self) internal constant returns (uint r) {
+    function sizeOf(CLL storage self)
+        internal view returns (uint r)
+    {
         int i = step(self, HEAD, NEXT);
         while (i != HEAD) {
             i = step(self, i, NEXT);
@@ -145,14 +161,14 @@ library LibCLLi {
 
     // Returns the links of a node as and array
     function getNode(CLL storage self, int n)
-        internal  constant returns (int[2])
+        internal view returns (int[2])
     {
         return [self.cll[n][PREV], self.cll[n][NEXT]];
     }
 
     // Returns the link of a node `n` in direction `d`.
     function step(CLL storage self, int n, bool d)
-        internal  constant returns (int)
+        internal view returns (int)
     {
         return self.cll[n][d];
     }
@@ -162,7 +178,7 @@ library LibCLLi {
     // `b` value to seek
     // `r` first node beyond `b` in direction `d`
     function seek(CLL storage self, int a, int b, bool d)
-        internal  constant returns (int r)
+        internal view returns (int r)
     {
         r = step(self, a, d);
         while  ((b!=r) && ((b < r) != d)) r = self.cll[r][d];
@@ -170,19 +186,26 @@ library LibCLLi {
     }
 
     // Creates a bidirectional link between two nodes on direction `d`
-    function stitch(CLL storage self, int a, int b, bool d) internal  {
+    function stitch(CLL storage self, int a, int b, bool d)
+        internal
+    {
         self.cll[b][!d] = a;
         self.cll[a][d] = b;
     }
 
     // Insert node `b` beside existing node `a` in direction `d`.
-    function insert (CLL storage self, int a, int b, bool d) internal  {
+    function insert (CLL storage self, int a, int b, bool d)
+        internal
+    {
         int c = self.cll[a][d];
         stitch (self, a, b, d);
         stitch (self, b, c, d);
     }
     
-    function remove(CLL storage self, int n) internal returns (int) {
+    // Remove node
+    function remove(CLL storage self, int n)
+        internal returns (int)
+    {
         if (n == NULL) return;
         stitch(self, self.cll[n][PREV], self.cll[n][NEXT], NEXT);
         delete self.cll[n][PREV];
@@ -190,11 +213,17 @@ library LibCLLi {
         return n;
     }
 
-    function push(CLL storage self, int n, bool d) internal  {
+    // Push a new node before or after the head
+    function push(CLL storage self, int n, bool d)
+        internal
+    {
         insert(self, HEAD, n, d);
     }
     
-    function pop(CLL storage self, bool d) internal returns (int) {
+    // Pop a new node from before or after the head
+    function pop(CLL storage self, bool d)
+        internal returns (int)
+    {
         return remove(self, step(self, HEAD, d));
     }
 }
