@@ -128,4 +128,4 @@ Deletes the node 'previous' or 'next' to the head and returns its value.
 TODO
 
 ## License
-All contributions are made under the GPLv3 license. See LICENSE.
+All contributions are made under the MIT license. See LICENSE.
