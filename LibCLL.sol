@@ -140,8 +140,8 @@ library LibCLLi {
 
     // n: node id  d: direction  r: return node id
 
-    // Return existential state of a node. n == HEAD returns list existence.
-    function exists(CLL storage self, int n)
+    // Return existential state of a list.
+    function exists(CLL storage self)
         internal view returns (bool)
     {
         if (self.cll[HEAD][PREV] != HEAD || self.cll[HEAD][NEXT] != HEAD)
