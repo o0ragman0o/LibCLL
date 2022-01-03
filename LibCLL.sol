@@ -38,7 +38,8 @@ library LibCLLu {
     uint constant HEAD = 0;
     bool constant PREV = false;
     bool constant NEXT = true;
-    
+    uint internal size;
+
     struct CLL{
         mapping (uint => mapping (bool => uint)) cll;
     }
@@ -52,17 +53,12 @@ library LibCLLu {
         if (self.cll[HEAD][PREV] != HEAD || self.cll[HEAD][NEXT] != HEAD)
             return true;
     }
-    
+
     // Returns the number of elements in the list
     function sizeOf(CLL storage self)
-        internal view returns (uint r)
+        internal view returns (uint)
     {
-        uint i = step(self, HEAD, NEXT);
-        while (i != HEAD) {
-            i = step(self, i, NEXT);
-            r++;
-        }
-        return;
+        return size;
     }
 
     // Returns the links of a node as and array
@@ -102,14 +98,16 @@ library LibCLLu {
         uint c = self.cll[a][d];
         stitch (self, a, b, d);
         stitch (self, b, c, d);
+        size += 1;
     }
-    
+
     // Remove node
     function remove(CLL storage self, uint n) internal returns (uint) {
         if (n == NULL) return;
         stitch(self, self.cll[n][PREV], self.cll[n][NEXT], NEXT);
         delete self.cll[n][PREV];
         delete self.cll[n][NEXT];
+        size -= 1;
         return n;
     }
 
@@ -117,7 +115,7 @@ library LibCLLu {
     function push(CLL storage self, uint n, bool d) internal {
         insert(self, HEAD, n, d);
     }
-    
+
     // Pop a new node from before or after the head
     function pop(CLL storage self, bool d) internal returns (uint) {
         return remove(self, step(self, HEAD, d));
@@ -133,7 +131,8 @@ library LibCLLi {
     int constant HEAD = 0;
     bool constant PREV = false;
     bool constant NEXT = true;
-    
+    uint internal size;
+
     struct CLL{
         mapping (int => mapping (bool => int)) cll;
     }
@@ -150,14 +149,9 @@ library LibCLLi {
 
     // Returns the number of elements in the list
     function sizeOf(CLL storage self)
-        internal view returns (uint r)
+        internal view returns (uint)
     {
-        int i = step(self, HEAD, NEXT);
-        while (i != HEAD) {
-            i = step(self, i, NEXT);
-            r++;
-        }
-        return;
+        return size;
     }
 
     // Returns the links of a node as and array
@@ -201,8 +195,9 @@ library LibCLLi {
         int c = self.cll[a][d];
         stitch (self, a, b, d);
         stitch (self, b, c, d);
+        size += 1;
     }
-    
+
     // Remove node
     function remove(CLL storage self, int n)
         internal returns (int)
@@ -211,6 +206,7 @@ library LibCLLi {
         stitch(self, self.cll[n][PREV], self.cll[n][NEXT], NEXT);
         delete self.cll[n][PREV];
         delete self.cll[n][NEXT];
+        size -= 1;
         return n;
     }
 
@@ -220,7 +216,7 @@ library LibCLLi {
     {
         insert(self, HEAD, n, d);
     }
-    
+
     // Pop a new node from before or after the head
     function pop(CLL storage self, bool d)
         internal returns (int)
